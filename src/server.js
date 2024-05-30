@@ -4,9 +4,23 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const searchRoutes = require("./routes/search");
+const partyRoutes = require("./routes/party");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 app.use("/api/search", searchRoutes);
+app.use("/api/party", partyRoutes);
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const MONGO_URI = process.env.MONGO_URI;
+
+mongoose
+  .connect(MONGO_URI)
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error("Connection error", err);
+  });
