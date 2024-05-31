@@ -8,6 +8,7 @@ const partySchema = new mongoose.Schema({
       title: String,
       thumbnail: String,
       user: String,
+      videoId: String
     },
   ],
 });

@@ -18,6 +18,7 @@ router.get("/:code", async (req, res) => {
   if (!party) {
     return res.status(404).json({ message: "Festa não encontrada" });
   }
+
   res.json(party);
 });
 
@@ -31,13 +32,14 @@ router.get("/", async (req, res) => {
 router.post("/:code/videos", async (req, res) => {
   const { code } = req.params;
   const { id, title, thumbnail, user } = req.body;
+  const videoId = uuidv4();
 
   const party = await Party.findOne({ code });
   if (!party) {
     return res.status(404).json({ message: "Festa não encontrada" });
   }
 
-  party.videos.push({ id, title, thumbnail, user });
+  party.videos.push({ id, title, thumbnail, user, videoId });
   await party.save();
 
   res.json(party);
@@ -52,7 +54,7 @@ router.delete("/:code/videos/:videoId", async (req, res) => {
     return res.status(404).json({ message: "Festa não encontrada" });
   }
 
-  party.videos = party.videos.filter((video) => video.id !== videoId);
+  party.videos = party.videos.filter((video) => video.videoId !== videoId);
   await party.save();
 
   res.json(party);
