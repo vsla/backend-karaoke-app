@@ -1,5 +1,5 @@
 const express = require("express");
-const Party = require("../models/Party");
+const Party = require("../models/PartyModal");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { getIO } = require("../socket");
@@ -80,6 +80,71 @@ router.put("/:code/videos", async (req, res) => {
   getIO().to(code).emit("updateQueue", party.videos);
 
   res.json(party);
+});
+
+// // Play video
+// router.post("/:code/play", async (req, res) => {
+//   const { code } = req.params;
+//   const party = await Party.findOne({ code });
+//   if (!party) {
+//     return res.status(404).json({ message: "Festa não encontrada" });
+//   }
+
+//   party.isPlaying = true;
+//   await party.save();
+
+//   getIO().to(code).emit("playVideo", party);
+
+//   res.json(party);
+// });
+
+// // Pause video
+// router.post("/:code/pause", async (req, res) => {
+//   const { code } = req.params;
+//   const party = await Party.findOne({ code });
+//   if (!party) {
+//     return res.status(404).json({ message: "Festa não encontrada" });
+//   }
+
+//   party.isPlaying = false;
+//   await party.save();
+
+//   getIO().to(code).emit("pauseVideo", party);
+
+//   res.json(party);
+// });
+
+// Next video
+router.post("/:code/next", async (req, res) => {
+  const { code } = req.params;
+  const party = await Party.findOne({ code });
+  if (!party) {
+    return res.status(404).json({ message: "Festa não encontrada" });
+  }
+
+  const { videos } = party;
+
+  if (videos.length > 0) {
+    const hasNextVideo = videos.length > 2;
+
+    if (hasNextVideo) {
+      party.videos = videos.slice(1);
+    }
+
+    if (videos.length === 1) {
+      party.videos = [];
+      party.isPlaying = false;
+    }
+
+    await party.save();
+
+    getIO().to(code).emit("nextVideo", party);
+    getIO().to(code).emit("updateQueue", party.videos);
+
+    res.json(party);
+  } else {
+    res.json({ party, message: "don't have a next video" });
+  }
 });
 
 module.exports = router;

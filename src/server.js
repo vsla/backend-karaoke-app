@@ -25,8 +25,9 @@ mongoose
     const io = socket.init(server);
 
     io.on("connection", (socket) => {
-      console.log("Client connected");
+      
       socket.on("joinParty", (partyCode) => {
+        
         socket.join(partyCode);
       });
     });
